@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0055a5">
+<link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Личный кабинет — Супротек Ростов</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="top-bar">
+    <div class="container top-bar-inner">
+      <div class="top-info">
+        <span class="official-badge">✓ Официальный представитель производителя в Ростове-на-Дону</span>
+      </div>
+      <div class="top-contacts">
+        <a href="tel:+79289002221" class="top-phone">8 (928) 900-22-21</a>
+        <span class="top-worktime">Пн-Сб: 9:00 - 19:00</span>
+      </div>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-wrapper">
+          <span class="logo-text-main">СУПРОТЕК</span>
+          <span class="logo-text-sub">РОСТОВ</span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <nav class="main-nav">
+    <div class="container">
+      <ul class="nav-list">
+        <li><a href="index.html" class="nav-link">Каталог</a></li>
+        <li><a href="account.html" class="nav-link active">Личный кабинет</a></li>
+        <li><a href="contacts.html" class="nav-link">Контакты</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <section class="account-section">
+    <div class="container">
+      <h1>Личный кабинет</h1>
+      <div class="account-grid">
+        <div class="account-card">
+          <h3>Профиль</h3>
+          <div id="userInfo"></div>
+          <button class="btn-logout" id="logoutBtn">Выйти</button>
+        </div>
+        <div class="account-card">
+          <h3>Бонусы</h3>
+          <div class="bonus-info">
+            <div class="bonus-points" id="bonusPoints">0</div>
+            <p>бонусных баллов</p>
+            <small>1 балл = 1 рубль скидки</small>
+          </div>
+        </div>
+        <div class="account-card full-width">
+          <h3>Мои заказы</h3>
+          <div id="ordersList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    async function loadProfile() {
+      const res = await fetch('/api/auth/profile', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        const user = await res.json();
+        document.getElementById('userInfo').innerHTML = `
+          <p><strong>Имя:</strong> ${user.name || 'Не указано'}</p>
+          <p><strong>Email:</strong> ${user.email}</p>
+          <p><strong>Телефон:</strong> ${user.phone || 'Не указан'}</p>
+        `;
+        document.getElementById('bonusPoints').textContent = user.bonus_points || 0;
+      }
+    }
+
+    async function loadOrders() {
+      const res = await fetch('/api/orders/my', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        const orders = await res.json();
+        if (orders.length === 0) {
+          document.getElementById('ordersList').innerHTML = '<p>У вас пока нет заказов</p>';
+        } else {
+          document.getElementById('ordersList').innerHTML = orders.map(order => `
+            <div class="order-item">
+              <div class="order-header">
+                <strong>Заказ #${order.id}</strong>
+                <span class="order-status status-${order.status}">${order.status}</span>
+              </div>
+              <div class="order-date">${new Date(order.created_at).toLocaleDateString('ru')}</div>
+              <div class="order-total">Сумма: ${order.total} ₽</div>
+              <div class="order-items">${JSON.parse(order.items).map(i => `${i.name} x${i.qty}`).join(', ')}</div>
+            </div>
+          `).join('');
+        }
+      }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = 'index.html';
+    });
+
+    loadProfile();
+    loadOrders();
+  </script>
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0055a5">
+<link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ-панель — Супротек Ростов</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="top-bar">
+    <div class="container top-bar-inner">
+      <div class="top-info">
+        <span class="official-badge">Админ-панель</span>
+      </div>
+      <div class="top-contacts">
+        <a href="index.html" class="top-phone">← На сайт</a>
+      </div>
+    </div>
+  </div>
+
+  <section class="admin-section">
+    <div class="container">
+      <h1>Админ-панель</h1>
+      <div class="admin-tabs">
+        <button class="tab-btn active" data-tab="products">Товары</button>
+        <button class="tab-btn" data-tab="orders">Заказы</button>
+        <button class="tab-btn" data-tab="add-product">Добавить товар</button>
+      </div>
+
+      <!-- Товары -->
+      <div class="tab-content active" id="tab-products">
+        <h2>Все товары</h2>
+        <div id="adminProductsList"></div>
+      </div>
+
+      <!-- Заказы -->
+      <div class="tab-content" id="tab-orders">
+        <h2>Все заказы</h2>
+        <div id="adminOrdersList"></div>
+      </div>
+
+      <!-- Добавить товар -->
+      <div class="tab-content" id="tab-add-product">
+        <h2>Добавить товар</h2>
+        <form id="addProductForm" class="admin-form">
+          <div class="form-group">
+            <label>Название *</label>
+            <input type="text" id="prodName" required>
+          </div>
+          <div class="form-group">
+            <label>Описание</label>
+            <textarea id="prodDesc" rows="4"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Цена (₽) *</label>
+              <input type="number" id="prodPrice" required>
+            </div>
+            <div class="form-group">
+              <label>Остаток (шт) *</label>
+              <input type="number" id="prodStock" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Категория *</label>
+              <select id="prodCategory" required>
+                <option value="engine">Для двигателя</option>
+                <option value="fuel">Для топлива</option>
+                <option value="trans">Для трансмиссии</option>
+                <option value="oil">Масла</option>
+                <option value="care">Автохимия</option>
+                <option value="other">Прочее</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Бейдж</label>
+              <select id="prodBadge">
+                <option value="">Нет</option>
+                <option value="Хит">Хит</option>
+                <option value="Новинка">Новинка</option>
+                <option value="Акция">Акция</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Фото товара</label>
+            <input type="file" id="prodImage" accept="image/*">
+          </div>
+          <button type="submit" class="btn-primary">Добавить товар</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    if (!token || user.role !== 'admin') {
+      window.location.href = 'login.html';
+    }
+
+    // Переключение вкладок
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+      });
+    });
+
+    // Загрузка товаров
+    async function loadAdminProducts() {
+      const res = await fetch('/api/products');
+      const products = await res.json();
+
+      document.getElementById('adminProductsList').innerHTML = products.map(p => `
+        <div class="admin-product-item">
+          <div class="admin-product-info">
+            <strong>${p.name}</strong>
+            <div class="admin-product-meta">
+              <span>${p.category}</span>
+              <span>${p.price} ₽</span>
+              <span>Остаток: ${p.stock} шт</span>
+              ${p.badge ? `<span class="badge">${p.badge}</span>` : ''}
+            </div>
+          </div>
+          <button class="btn-delete" onclick="deleteProduct(${p.id})">Удалить</button>
+        </div>
+      `).join('');
+    }
+
+    // Загрузка заказов
+    async function loadAdminOrders() {
+      const res = await fetch('/api/orders', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const orders = await res.json();
+
+      document.getElementById('adminOrdersList').innerHTML = orders.map(order => `
+        <div class="admin-order-item">
+          <div class="admin-order-header">
+            <strong>Заказ #${order.id}</strong>
+            <select class="status-select" onchange="updateOrderStatus(${order.id}, this.value)">
+              <option value="new" ${order.status === 'new' ? 'selected' : ''}>Новый</option>
+              <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>В обработке</option>
+              <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Отправлен</option>
+              <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Доставлен</option>
+              <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Отменён</option>
+            </select>
+          </div>
+          <div class="admin-order-info">
+            <p><strong>Клиент:</strong> ${order.customer_name}</p>
+            <p><strong>Телефон:</strong> ${order.customer_phone}</p>
+            <p><strong>Email:</strong> ${order.customer_email || 'не указан'}</p>
+            <p><strong>Доставка:</strong> ${order.delivery_type}</p>
+            <p><strong>Адрес:</strong> ${order.delivery_address || 'самовывоз'}</p>
+            <p><strong>Оплата:</strong> ${order.payment_method}</p>
+            <p><strong>Сумма:</strong> ${order.total} ₽</p>
+            <p><strong>Дата:</strong> ${new Date(order.created_at).toLocaleString('ru')}</p>
+          </div>
+          <div class="admin-order-items">
+            <strong>Товары:</strong>
+            ${JSON.parse(order.items).map(i => `<div>- ${i.name} x${i.qty} = ${i.price * i.qty} ₽</div>`).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Добавление товара
+    document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData();
+      formData.append('name', document.getElementById('prodName').value);
+      formData.append('description', document.getElementById('prodDesc').value);
+      formData.append('price', document.getElementById('prodPrice').value);
+      formData.append('stock', document.getElementById('prodStock').value);
+      formData.append('category', document.getElementById('prodCategory').value);
+      formData.append('badge', document.getElementById('prodBadge').value);
+
+      const imageFile = document.getElementById('prodImage').files[0];
+      if (imageFile) {
+        formData.append('image', imageFile);
+      }
+
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+
+      if (res.ok) {
+        alert('Товар добавлен!');
+        document.getElementById('addProductForm').reset();
+        loadAdminProducts();
+      } else {
+        alert('Ошибка добавления товара');
+      }
+    });
+
+    // Удаление товара
+    async function deleteProduct(id) {
+      if (!confirm('Удалить товар?')) return;
+
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        loadAdminProducts();
+      }
+    }
+
+    // Обновление статуса заказа
+    async function updateOrderStatus(id, status) {
+      const res = await fetch(`/api/orders/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
+      });
+
+      if (res.ok) {
+        alert('Статус обновлён');
+      }
+    }
+
+    loadAdminProducts();
+    loadAdminOrders();
+  </script>
+</body>
+</html>

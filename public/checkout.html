@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0055a5">
+<link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Оформление заказа — Супротек Ростов</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="top-bar">
+    <div class="container top-bar-inner">
+      <div class="top-info">
+        <span class="official-badge">✓ Официальный представитель производителя в Ростове-на-Дону</span>
+      </div>
+      <div class="top-contacts">
+        <a href="tel:+79289002221" class="top-phone">8 (928) 900-22-21</a>
+        <span class="top-worktime">Пн-Сб: 9:00 - 19:00</span>
+      </div>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-wrapper">
+          <span class="logo-text-main">СУПРОТЕК</span>
+          <span class="logo-text-sub">РОСТОВ</span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <section class="checkout-section">
+    <div class="container">
+      <h1>Оформление заказа</h1>
+      <div class="checkout-grid">
+        <div class="checkout-form">
+          <h2>Данные покупателя</h2>
+          <form id="checkoutForm">
+            <div class="form-group">
+              <label>Имя *</label>
+              <input type="text" id="custName" required>
+            </div>
+            <div class="form-group">
+              <label>Телефон *</label>
+              <input type="tel" id="custPhone" required>
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="custEmail">
+            </div>
+
+            <h2>Способ доставки</h2>
+            <div class="delivery-options">
+                <label class="radio-label">
+                    <input type="radio" name="delivery" value="pickup" checked>
+                    <span>Самовывоз (бесплатно) — оплата наличными или переводом</span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="delivery" value="cdek">
+                    <span>СДЭК — только онлайн оплата</span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="delivery" value="pochta">
+                    <span>Почта России — только онлайн оплата</span>
+                </label>
+                <label class="radio-label">
+                    <input type="radio" name="delivery" value="yandex">
+                    <span>Яндекс Доставка — только онлайн оплата</span>
+                </label>
+                </div>
+
+            <div class="form-group" id="addressGroup" style="display:none;">
+              <label>Адрес доставки</label>
+              <input type="text" id="custAddress" placeholder="Город, улица, дом, квартира">
+            </div>
+
+            <h2>Способ оплаты</h2>
+            <div class="payment-options" id="paymentOptions">
+            <label class="radio-label" data-payment="yookassa">
+                <input type="radio" name="payment" value="yookassa" checked>
+                <span>ЮKassa (онлайн)</span>
+            </label>
+            <label class="radio-label" data-payment="cash" id="cashOption">
+                <input type="radio" name="payment" value="cash">
+                <span>Наличными (только самовывоз)</span>
+            </label>
+            <label class="radio-label" data-payment="transfer">
+                <input type="radio" name="payment" value="transfer">
+                <span>Переводом</span>
+            </label>
+            </div>
+
+            <button type="submit" class="btn-primary">Оформить заказ</button>
+          </form>
+        </div>
+
+        <div class="checkout-summary">
+          <h2>Ваш заказ</h2>
+          <div id="checkoutItems"></div>
+          <div class="checkout-total">
+            <strong>Итого:</strong>
+            <span id="checkoutTotal">0 ₽</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const cart = JSON.parse(localStorage.getItem('suprotec_cart') || '[]');
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    if (cart.length === 0) {
+      window.location.href = 'index.html';
+    }
+
+    // Заполнение данных из профиля
+    if (user.name) document.getElementById('custName').value = user.name;
+    if (user.phone) document.getElementById('custPhone').value = user.phone;
+    if (user.email) document.getElementById('custEmail').value = user.email;
+
+    // Отображение товаров
+    document.getElementById('checkoutItems').innerHTML = cart.map(item => `
+      <div class="checkout-item">
+        <span>${item.name} x${item.qty}</span>
+        <span>${item.price * item.qty} ₽</span>
+      </div>
+    `).join('');
+
+    const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+    document.getElementById('checkoutTotal').textContent = total + ' ₽';
+
+    // Показ/скрытие адреса и доступных способов оплаты
+document.querySelectorAll('input[name="delivery"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    const isPickup = e.target.value === 'pickup';
+    
+    // Показ/скрытие поля адреса
+    document.getElementById('addressGroup').style.display = isPickup ? 'none' : 'block';
+    
+    // Показ/скрытие опции "Наличными"
+    const cashOption = document.getElementById('cashOption');
+    if (isPickup) {
+      cashOption.style.display = 'flex';
+      cashOption.style.opacity = '1';
+      cashOption.style.pointerEvents = 'auto';
+    } else {
+      cashOption.style.display = 'none';
+      // Если выбрано "Наличными", сбрасываем на "ЮKassa"
+      const cashRadio = cashOption.querySelector('input[type="radio"]');
+      if (cashRadio.checked) {
+        document.querySelector('input[name="payment"][value="yookassa"]').checked = true;
+      }
+    }
+  });
+});
+
+    // Оформление заказа
+    document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const deliveryType = document.querySelector('input[name="delivery"]:checked').value;
+      const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+
+      const orderData = {
+        customer_name: document.getElementById('custName').value,
+        customer_phone: document.getElementById('custPhone').value,
+        customer_email: document.getElementById('custEmail').value,
+        delivery_type: deliveryType,
+        delivery_address: document.getElementById('custAddress').value,
+        payment_method: paymentMethod,
+        items: cart,
+        total: total,
+        user_id: user.id || null
+      };
+
+      try {
+        const res = await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          if (paymentMethod === 'yookassa') {
+            // Перенаправление на ЮKassa
+            const payRes = await fetch('/api/yookassa/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                order_id: data.id,
+                amount: total,
+                description: `Заказ #${data.id}`
+              })
+            });
+
+            const payData = await payRes.json();
+            if (payData.payment_url) {
+              window.location.href = payData.payment_url;
+            }
+          } else {
+            alert(`Заказ #${data.id} оформлен! Мы свяжемся с вами для подтверждения.`);
+            localStorage.removeItem('suprotec_cart');
+            window.location.href = 'index.html';
+          }
+        } else {
+          alert('Ошибка оформления заказа');
+        }
+      } catch (err) {
+        alert('Ошибка соединения');
+      }
+    });
+  </script>
+</body>
+</html>

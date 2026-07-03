@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="productTitle">Товар — Супротек Ростов</title>
+  <meta name="description" content="Купить Suprotec в Ростове-на-Дону">
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Верхняя панель -->
+  <div class="top-bar">
+    <div class="container top-bar-inner">
+      <div class="top-info">
+        <span class="official-badge">✓ Официальный представитель производителя в Ростове-на-Дону</span>
+      </div>
+      <div class="top-contacts">
+        <a href="tel:+79289002221" class="top-phone">8 (928) 900-22-21</a>
+        <span class="top-worktime">Пн-Сб: 9:00 - 19:00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Шапка -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-wrapper">
+          <span class="logo-text-main">СУПРОТЕК</span>
+          <span class="logo-text-sub">РОСТОВ</span>
+        </div>
+      </a>
+      
+      <div class="header-center">
+        <div class="search-box">
+          <input type="text" placeholder="Поиск по товарам..." class="search-input" id="searchInput">
+          <button class="search-btn">🔍</button>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <a href="login.html" class="header-action" id="userAction">
+          <div class="action-icon">👤</div>
+          <div class="action-text">
+            <div class="action-label">Войти</div>
+            <div class="action-sub">или зарегистрироваться</div>
+          </div>
+        </a>
+        <button class="cart-btn-large" id="cartBtn">
+          <div class="cart-icon">🛒</div>
+          <div class="cart-info">
+            <div class="cart-label">Корзина</div>
+            <div class="cart-sum" id="cartSum">0 ₽</div>
+          </div>
+          <div class="cart-count" id="cartCount">0</div>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Навигация -->
+  <nav class="main-nav">
+    <div class="container">
+      <ul class="nav-list">
+        <li><a href="index.html#catalog" class="nav-link">Каталог</a></li>
+        <li><a href="index.html#delivery" class="nav-link">Доставка</a></li>
+        <li><a href="contacts.html" class="nav-link">Контакты</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Страница товара -->
+  <section class="product-page">
+    <div class="container">
+      <div class="breadcrumb">
+        <a href="index.html">Главная</a> / 
+        <a href="index.html#catalog">Каталог</a> / 
+        <span id="productCategory">Категория</span>
+      </div>
+
+      <div class="product-detail">
+        <div class="product-gallery">
+          <div class="product-main-image" id="productImage">
+            <span class="placeholder-icon">📦</span>
+          </div>
+          <div class="product-badge" id="productBadge"></div>
+        </div>
+
+        <div class="product-info-detail">
+          <div class="product-category-detail" id="productCategoryName">Категория</div>
+          <h1 class="product-name-detail" id="productName">Название товара</h1>
+          
+          <div class="product-price-detail" id="productPrice">0 ₽</div>
+          
+          <div class="product-stock" id="productStock">
+            <span class="stock-status in-stock">✓ В наличии</span>
+            <span class="stock-count"></span>
+          </div>
+
+          <div class="product-description-detail">
+            <h3>Описание</h3>
+            <p id="productDescription">Описание товара</p>
+          </div>
+
+          <div class="product-actions">
+            <div class="quantity-selector">
+              <label>Количество:</label>
+              <div class="qty-controls">
+                <button class="qty-btn" onclick="decreaseQty()">−</button>
+                <input type="number" id="productQty" value="1" min="1" max="99">
+                <button class="qty-btn" onclick="increaseQty()">+</button>
+              </div>
+            </div>
+            
+            <button class="btn-add-to-cart-large" onclick="addToCartFromProduct()">
+              🛒 Добавить в корзину
+            </button>
+          </div>
+
+          <div class="product-meta">
+            <div class="meta-item">
+              <strong>Артикул:</strong> <span id="productSKU">-</span>
+            </div>
+            <div class="meta-item">
+              <strong>Доставка:</strong> По Ростовской области
+            </div>
+            <div class="meta-item">
+              <strong>Оплата:</strong> Наличными, картой, онлайн
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Характеристики -->
+      <div class="product-specs">
+        <h3>Характеристики и применение</h3>
+        <div class="specs-content" id="productFullDescription">
+          <!-- Полное описание -->
+        </div>
+      </div>
+
+      <!-- Похожие товары -->
+      <div class="related-products">
+        <h3>Похожие товары</h3>
+        <div class="products-new" id="relatedProducts"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer-new">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h4>Супротек Ростов</h4>
+          <p>Официальный представитель продукции Suprotec в Ростове-на-Дону</p>
+          <p class="footer-phone">8 (928) 900-22-21</p>
+        </div>
+        <div class="footer-col">
+          <h4>Информация</h4>
+          <ul>
+            <li><a href="index.html#delivery">Доставка</a></li>
+            <li><a href="contacts.html">Контакты</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Контакты</h4>
+          <p>г. Ростов-на-Дону<br>переулок Подсолнечный 2Б<br>344013</p>
+          <p>467268@mail.ru</p>
+          <p>Пн-Сб: 9:00 - 19:00</p>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 Супротек Ростов. suprotec-rostov.ru</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  <script>
+    // Загрузка товара
+    let currentProduct = null;
+    let currentQty = 1;
+
+    async function loadProduct() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const productId = urlParams.get('id');
+
+      if (!productId) {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/products');
+        const products = await res.json();
+        currentProduct = products.find(p => p.id == productId);
+
+        if (!currentProduct) {
+          window.location.href = 'index.html';
+          return;
+        }
+
+        renderProduct(currentProduct);
+        loadRelatedProducts(currentProduct.category, productId);
+      } catch (err) {
+        console.error('Ошибка загрузки товара:', err);
+      }
+    }
+
+    function renderProduct(product) {
+      document.getElementById('productTitle').textContent = product.name + ' — Супротек Ростов';
+      document.getElementById('productName').textContent = product.name;
+      document.getElementById('productCategory').textContent = getCategoryName(product.category);
+      document.getElementById('productCategoryName').textContent = getCategoryName(product.category);
+      document.getElementById('productPrice').textContent = product.price.toLocaleString('ru') + ' ₽';
+      document.getElementById('productDescription').textContent = product.description || 'Описание отсутствует';
+      document.getElementById('productFullDescription').innerHTML = `<p>${product.description || ''}</p>`;
+      
+      // Картинка
+      const imgContainer = document.getElementById('productImage');
+      if (product.image) {
+        imgContainer.innerHTML = `<img src="${product.image}" alt="${product.name}">`;
+      } else {
+        imgContainer.innerHTML = '<span class="placeholder-icon">📦</span>';
+      }
+
+      // Бейдж
+      const badgeEl = document.getElementById('productBadge');
+      if (product.badge) {
+        badgeEl.textContent = product.badge;
+        badgeEl.style.display = 'block';
+      }
+
+      // Наличие
+      const stockEl = document.getElementById('productStock');
+      if (product.stock > 0) {
+        stockEl.innerHTML = `<span class="stock-status in-stock">✓ В наличии</span><span class="stock-count">${product.stock} шт.</span>`;
+      } else {
+        stockEl.innerHTML = `<span class="stock-status out-of-stock">✗ Нет в наличии</span>`;
+      }
+
+      // Максимум в корзине
+      const qtyInput = document.getElementById('productQty');
+      qtyInput.max = product.stock > 0 ? product.stock : 0;
+      if (product.stock === 0) {
+        qtyInput.disabled = true;
+        qtyInput.value = 0;
+      }
+    }
+
+    function loadRelatedProducts(category, currentId) {
+      fetch('/api/products')
+        .then(res => res.json())
+        .then(products => {
+          const related = products
+            .filter(p => p.category === category && p.id != currentId)
+            .slice(0, 4);
+          
+          const container = document.getElementById('relatedProducts');
+          if (related.length === 0) {
+            container.style.display = 'none';
+            return;
+          }
+
+          container.innerHTML = related.map(p => `
+            <div class="product-card-new">
+              <div class="product-image-new">
+                ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+                ${p.image ? `<img src="${p.image}" alt="${p.name}">` : '📦'}
+              </div>
+              <div class="product-info-new">
+                <div class="product-category-new">${getCategoryName(p.category)}</div>
+                <div class="product-name-new">${p.name}</div>
+                <div class="product-footer-new">
+                  <div class="product-price-new">${p.price.toLocaleString('ru')} ₽</div>
+                  <a href="product.html?id=${p.id}" class="btn-more">Подробнее</a>
+                </div>
+              </div>
+            </div>
+          `).join('');
+        });
+    }
+
+    function getCategoryName(cat) {
+      const names = {
+        engine: 'Для двигателя',
+        fuel: 'Для топлива',
+        trans: 'Для трансмиссии',
+        oil: 'Масла',
+        care: 'Автохимия',
+        other: 'Прочее'
+      };
+      return names[cat] || cat;
+    }
+
+    function increaseQty() {
+      const input = document.getElementById('productQty');
+      if (parseInt(input.value) < parseInt(input.max)) {
+        input.value = parseInt(input.value) + 1;
+        currentQty = input.value;
+      }
+    }
+
+    function decreaseQty() {
+      const input = document.getElementById('productQty');
+      if (parseInt(input.value) > 1) {
+        input.value = parseInt(input.value) - 1;
+        currentQty = input.value;
+      }
+    }
+
+    function addToCartFromProduct() {
+      if (!currentProduct || currentProduct.stock === 0) {
+        alert('Товар недоступен');
+        return;
+      }
+
+      const existing = cart.find(i => i.id === currentProduct.id);
+      if (existing) {
+        if (existing.qty + currentQty > currentProduct.stock) {
+          alert(`Максимум доступно ${currentProduct.stock} шт.`);
+          return;
+        }
+        existing.qty += currentQty;
+      } else {
+        cart.push({ 
+          id: currentProduct.id, 
+          name: currentProduct.name, 
+          price: currentProduct.price, 
+          image: currentProduct.image,
+          qty: currentQty 
+        });
+      }
+      
+      saveCart();
+      updateCartUI();
+      alert(`Товар добавлен в корзину (${currentQty} шт.)`);
+    }
+
+    // Инициализация
+    loadProduct();
+  </script>
+</body>
+</html>

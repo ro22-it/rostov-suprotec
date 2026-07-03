@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0055a5">
+<link rel="manifest" href="/manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация — Супротек Ростов</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="top-bar">
+    <div class="container top-bar-inner">
+      <div class="top-info">
+        <span class="official-badge">✓ Официальный представитель производителя в Ростове-на-Дону</span>
+      </div>
+      <div class="top-contacts">
+        <a href="tel:+79289002221" class="top-phone">8 (928) 900-22-21</a>
+        <span class="top-worktime">Пн-Сб: 9:00 - 19:00</span>
+      </div>
+    </div>
+  </div>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <div class="logo-wrapper">
+          <span class="logo-text-main">СУПРОТЕК</span>
+          <span class="logo-text-sub">РОСТОВ</span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <section class="auth-section">
+    <div class="container">
+      <div class="auth-card">
+        <h2>Регистрация</h2>
+        <form id="registerForm">
+          <div class="form-group">
+            <label>Имя</label>
+            <input type="text" id="regName">
+          </div>
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" id="regEmail" required>
+          </div>
+          <div class="form-group">
+            <label>Телефон</label>
+            <input type="tel" id="regPhone" placeholder="+7 (___) ___-__-__">
+          </div>
+          <div class="form-group">
+            <label>Пароль *</label>
+            <input type="password" id="regPassword" required>
+          </div>
+          <button type="submit" class="btn-primary">Зарегистрироваться</button>
+          <div class="auth-links">
+            <a href="login.html">Уже есть аккаунт? Войти</a>
+          </div>
+        </form>
+        <div id="registerError" class="error-message"></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('regName').value;
+      const email = document.getElementById('regEmail').value;
+      const phone = document.getElementById('regPhone').value;
+      const password = document.getElementById('regPassword').value;
+
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, name, phone })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          window.location.href = 'account.html';
+        } else {
+          document.getElementById('registerError').textContent = data.error;
+        }
+      } catch (err) {
+        document.getElementById('registerError').textContent = 'Ошибка соединения';
+      }
+    });
+  </script>
+</body>
+</html>
